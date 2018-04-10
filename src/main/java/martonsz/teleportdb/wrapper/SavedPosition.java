@@ -72,9 +72,7 @@ public class SavedPosition {
 
 	@Override
 	public String toString() {
-		return "SavedPosition [username=" + username + ", positionName=" + positionName + ", blockPos=" + blockPos
-				+ ", pitch=" + pitch + ", rotationYaw=" + rotationYaw + ", dimension=" + dimension + ", isPublic="
-				+ isPublic + "]";
+		return getPositionName() + ": " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ();
 	}
 
 }

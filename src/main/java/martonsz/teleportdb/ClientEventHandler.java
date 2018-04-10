@@ -13,8 +13,8 @@ public class ClientEventHandler {
 		EntityPlayer player = event.player;
 		World world = player.getEntityWorld();
 		if (!world.isRemote) {
-			player.sendMessage(new TextComponentString(
-					"This server is running Teleport Database " + Ref.VERSION + " by marton.sz!"));
+			player.sendMessage(
+					new TextComponentString("This server is running Teleport Database " + Ref.VERSION + " by marton.sz!"));
 			player.sendMessage(new TextComponentString("Type /tpd help in the console for more info."));
 		}
 	}

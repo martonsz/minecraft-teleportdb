@@ -1,7 +1,5 @@
 package martonsz.teleportdb;
 
-import org.apache.logging.log4j.Logger;
-
 import martonsz.teleportdb.command.CommandTpd;
 import martonsz.teleportdb.proxy.CommonProxy;
 import net.minecraftforge.fml.common.Mod;
@@ -17,7 +15,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 @Mod(modid = Ref.MODID, name = Ref.NAME, version = Ref.VERSION, acceptableRemoteVersions = Ref.ACCEPTED_REMOTE_VERSION)
 public class Main {
 
-	private static Logger logger;
+	// private static Logger logger;
 
 	@Instance
 	public static Main instance;
@@ -26,18 +24,8 @@ public class Main {
 	public static CommonProxy proxy;
 
 	@EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
-		proxy.preInit(event);
-	}
-
-	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		proxy.init(event);
-	}
-
-	@EventHandler
-	public void postInit(FMLPostInitializationEvent event) {
-		proxy.postInit(event);
 	}
 
 	@EventHandler
@@ -47,6 +35,16 @@ public class Main {
 
 	@EventHandler
 	public void onServerStopping(FMLServerStoppingEvent event) {
+	}
+
+	@EventHandler
+	public void postInit(FMLPostInitializationEvent event) {
+		proxy.postInit(event);
+	}
+
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event) {
+		proxy.preInit(event);
 	}
 
 }
