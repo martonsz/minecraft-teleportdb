@@ -158,6 +158,8 @@ public class CommandTpd extends CommandBase {
 		sb.append("/tpd list [public]             - List saved positions\n");
 		sb.append("/tpd name [public]             - Teleport to named position.\n");
 		sb.append("/tpd delete name [public]      - Delete saved position.\n");
+		sb.append("\n");
+		sb.append("The order of the arguments doesn't matter.\n");
 		return sb.toString();
 	}
 
