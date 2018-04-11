@@ -52,6 +52,10 @@ public class CommandTpd extends CommandBase {
 				boolean isPublic = commands.remove("public");
 				String username = sender.getName();
 
+				if (commands.remove("help")) {
+					player.sendMessage(new TextComponentString(getUsage(sender)));
+					return;
+				}
 				if (commands.remove("save")) {
 					/*
 					 * save
@@ -79,7 +83,8 @@ public class CommandTpd extends CommandBase {
 					} else {
 						positions = database.listPositionsPrivate(username);
 					}
-					player.sendMessage(new TextComponentString("--- " + (isPublic ? "Public" : "Private") + " list  ---"));
+					player.sendMessage(
+							new TextComponentString("--- " + (isPublic ? "Public" : "Private") + " list  ---"));
 					for (String positionString : positions) {
 						player.sendMessage(new TextComponentString(positionString));
 					}
@@ -152,12 +157,23 @@ public class CommandTpd extends CommandBase {
 	@Override
 	public String getUsage(ICommandSender sender) {
 		StringBuffer sb = new StringBuffer();
-		sb.append("/tpd save [-f] [name] [public] - Save your current position as 'name'. \n");
-		sb.append("                                 Use -f to force save and overwrite existing name\n");
-		sb.append("                                 Ff no named is specifed the 'name' is used.\n");
-		sb.append("/tpd list [public]             - List saved positions\n");
-		sb.append("/tpd name [public]             - Teleport to named position.\n");
-		sb.append("/tpd delete name [public]      - Delete saved position.\n");
+		sb.append("\n");
+		sb.append("/tpd save [-f] [name] [public] \n");
+		sb.append(" | Save your current position as 'name'. \n");
+		sb.append(" | Use -f to force save and overwrite existing name.\n");
+		sb.append(" | If name is excluded 'home' will be used as name.\n");
+		sb.append("\n");
+
+		sb.append("/tpd list [public] \n");
+		sb.append(" | List saved positions. \n");
+		sb.append("\n");
+
+		sb.append("/tpd name [public] \n");
+		sb.append(" | Teleport to named position. \n");
+		sb.append("\n");
+
+		sb.append("/tpd delete name [public] \n");
+		sb.append(" | Delete saved position. \n");
 		sb.append("\n");
 		sb.append("The order of the arguments doesn't matter.\n");
 		return sb.toString();
@@ -187,8 +203,8 @@ public class CommandTpd extends CommandBase {
 		BlockPos blockPos = sender.getPosition();
 		float pitch = player.rotationPitch;
 		float rotationYaw = player.rotationYaw;
-		SavedPosition position = new SavedPosition(username, positionName, blockPos, pitch, rotationYaw, currentDimension,
-				isPublic);
+		SavedPosition position = new SavedPosition(username, positionName, blockPos, pitch, rotationYaw,
+				currentDimension, isPublic);
 
 		boolean success = PositionDatabase.get().savePosition(position, force);
 		if (success) {
