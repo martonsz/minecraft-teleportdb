@@ -115,13 +115,19 @@ public class PositionDatabase {
 	public SavedPosition getPosition(String username, String positionName, boolean isPublic) throws SQLException {
 		String table = getTable(isPublic);
 		StringBuffer sql = new StringBuffer();
-		sql.append("SELECT * FROM " + table + " WHERE username = ? AND position_name = ?");
+		sql.append("SELECT * FROM " + table + " WHERE position_name = ?");
+		boolean isPrivate = table.equals("tbl_private_position");
+		if (isPrivate) {
+			sql.append(" AND username = ?");
+		}
 
 		SavedPosition savedPosition = null;
 		try (Connection conn = getConnection()) {
 			PreparedStatement pstmt = conn.prepareStatement(sql.toString());
-			pstmt.setString(1, username);
-			pstmt.setString(2, positionName);
+			pstmt.setString(1, positionName);
+			if (isPrivate) {
+				pstmt.setString(2, username);
+			}
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
 				long blockLong = Long.parseLong(rs.getString("block_position"));
