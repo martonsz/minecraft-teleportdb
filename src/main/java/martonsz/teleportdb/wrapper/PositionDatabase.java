@@ -22,7 +22,11 @@ public class PositionDatabase {
 
 	private static PositionDatabase singleton;
 
-	public PositionDatabase() {
+	private static Logger logger = LogManager.getLogger(PositionDatabase.class);
+
+	private static String dbPath;
+
+	private PositionDatabase() {
 		createNewDatabase();
 	}
 
@@ -33,12 +37,10 @@ public class PositionDatabase {
 		return singleton;
 	}
 
-	private static Logger logger = LogManager.getLogger(PositionDatabase.class);
-	private static String dbPath;
-
 	public synchronized void createNewDatabase() {
-		if (PositionDatabase.dbPath != null)
+		if (PositionDatabase.dbPath != null) {
 			return;
+		}
 
 		// Fungerar för klient
 		// File worldDirectory = new File(Minecraft.getMinecraft().mcDataDir.getAbsolutePath() + "/saves/"
@@ -64,9 +66,9 @@ public class PositionDatabase {
 		publicSQL.append("CREATE TABLE tbl_public_position ( ");
 		publicSQL.append("   username TEXT NOT NULL, ");
 		publicSQL.append("	position_name TEXT, ");
-		publicSQL.append("	block_position REAL NOT NULL, ");
-		publicSQL.append("	pitch REAL NOT NULL, ");
-		publicSQL.append("	rotation REAL NOT NULL, ");
+		publicSQL.append("	block_position TEXT NOT NULL, ");
+		publicSQL.append("	pitch TEXT NOT NULL, ");
+		publicSQL.append("	rotation TEXT NOT NULL, ");
 		publicSQL.append("	dimension INTEGER NOT NULL, ");
 		publicSQL.append("    UNIQUE ( ");
 		publicSQL.append("        username, ");
@@ -79,9 +81,9 @@ public class PositionDatabase {
 		privateSQL.append("CREATE TABLE tbl_private_position ( ");
 		privateSQL.append("  username TEXT NOT NULL, ");
 		privateSQL.append("	position_name TEXT, ");
-		privateSQL.append("	block_position REAL NOT NULL, ");
-		privateSQL.append("	pitch REAL NOT NULL, ");
-		privateSQL.append("	rotation REAL NOT NULL, ");
+		privateSQL.append("	block_position TEXT NOT NULL, ");
+		privateSQL.append("	pitch TEXT NOT NULL, ");
+		privateSQL.append("	rotation TEXT NOT NULL, ");
 		privateSQL.append("	dimension INTEGER NOT NULL, ");
 		privateSQL.append("    UNIQUE ( ");
 		privateSQL.append("        username, ");
@@ -115,45 +117,27 @@ public class PositionDatabase {
 		StringBuffer sql = new StringBuffer();
 		sql.append("SELECT * FROM " + table + " WHERE username = ? AND position_name = ?");
 
+		SavedPosition savedPosition = null;
 		try (Connection conn = getConnection()) {
 			PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			pstmt.setString(1, username);
 			pstmt.setString(2, positionName);
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
-				long blockLong = rs.getLong("block_position");
-				float pitch = rs.getFloat("pitch");
-				float rotation = rs.getFloat("rotation");
+				long blockLong = Long.parseLong(rs.getString("block_position"));
+				float pitch = Float.parseFloat(rs.getString("pitch"));
+				float rotation = Float.parseFloat(rs.getString("rotation"));
 				int dimension = rs.getInt("dimension");
 				BlockPos blockPosition = BlockPos.fromLong(blockLong);
-				return new SavedPosition(username, positionName, blockPosition, pitch, rotation, dimension, isPublic);
+				savedPosition = new SavedPosition(username, positionName, blockPosition, pitch, rotation, dimension,
+						isPublic);
 			}
 		}
-		return null;
+		return savedPosition;
 	}
 
 	private String getTable(boolean isPublic) {
 		return isPublic ? "tbl_public_position" : "tbl_private_position";
-	}
-
-	/**
-	 * @param isPublic
-	 * @return
-	 * @throws SQLException
-	 */
-	public List<String> listPositionsPublic() throws SQLException {
-		String sql = "SELECT * FROM tbl_public_position ORDER BY username, position_name";
-
-		ArrayList<String> list = new ArrayList<>();
-		try (Connection conn = getConnection()) {
-			ResultSet rs = conn.createStatement().executeQuery(sql.toString());
-			while (rs.next()) {
-				String savedUsername = rs.getString("username");
-				String positionName = rs.getString("position_name");
-				list.add(positionName + " - " + savedUsername);
-			}
-		}
-		return list;
 	}
 
 	/**
@@ -172,6 +156,26 @@ public class PositionDatabase {
 			while (rs.next()) {
 				String positionName = rs.getString("position_name");
 				list.add(positionName);
+			}
+		}
+		return list;
+	}
+
+	/**
+	 * @param isPublic
+	 * @return
+	 * @throws SQLException
+	 */
+	public List<String> listPositionsPublic() throws SQLException {
+		String sql = "SELECT * FROM tbl_public_position ORDER BY username, position_name";
+
+		ArrayList<String> list = new ArrayList<>();
+		try (Connection conn = getConnection()) {
+			ResultSet rs = conn.createStatement().executeQuery(sql.toString());
+			while (rs.next()) {
+				String savedUsername = rs.getString("username");
+				String positionName = rs.getString("position_name");
+				list.add(positionName + " - " + savedUsername);
 			}
 		}
 		return list;
@@ -215,17 +219,19 @@ public class PositionDatabase {
 		} else {
 			SavedPosition savedPosition = getPosition(position.getUsername(), position.getPositionName(),
 					position.isPublic());
-			if (savedPosition != null)
+			if (savedPosition != null) {
 				return false;
+			}
 		}
 
+		int i = 100;
 		try (Connection conn = getConnection()) {
 			PreparedStatement pstmt = conn.prepareStatement(sql.toString());
 			pstmt.setString(1, position.getUsername());
 			pstmt.setString(2, position.getPositionName());
-			pstmt.setLong(3, position.getBlockPos().toLong());
-			pstmt.setFloat(4, position.getPitch());
-			pstmt.setFloat(5, position.getRotationYaw());
+			pstmt.setString(3, position.getBlockPos().toLong() + "");
+			pstmt.setString(4, position.getPitch() + "");
+			pstmt.setString(5, position.getRotationYaw() + "");
 			pstmt.setInt(6, position.getDimension());
 			pstmt.executeUpdate();
 			return true;

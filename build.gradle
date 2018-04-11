@@ -20,6 +20,12 @@ compileJava {
     sourceCompatibility = targetCompatibility = '1.8'
 }
 
+//Add "embedded" configuration
+configurations {
+	embed
+	compile.extendsFrom(embed)
+}
+
 minecraft {
     version = "1.12.2-14.23.2.2611"
     runDir = "run"
@@ -29,7 +35,7 @@ minecraft {
     // stable_#            stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20171003"
+    mappings = "snapshot_20180410"
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
@@ -43,7 +49,7 @@ dependencies {
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
     //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
     
-    compile 'org.xerial:sqlite-jdbc:3.21.0.1'
+    embed 'org.xerial:sqlite-jdbc:3.21.0.1'
 
     // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
     //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
@@ -57,6 +63,11 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
+}
+
+//Add dependencies to the JAR
+jar {
+	 from configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
 }
 
 processResources {
